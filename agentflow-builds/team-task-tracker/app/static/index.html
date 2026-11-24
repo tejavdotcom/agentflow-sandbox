@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Task Tracker</title><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+<header class="border-b border-slate-800 px-6 py-4 flex items-center gap-3">
+  <div class="h-8 w-8 rounded-lg bg-indigo-500 grid place-items-center font-bold">T</div>
+  <h1 class="text-lg font-semibold">Team Task Tracker</h1><span class="ml-auto text-xs text-slate-400" id="health"></span>
+</header>
+<main class="p-6 max-w-6xl mx-auto">
+  <form id="f" class="flex gap-2 mb-6">
+    <input id="t" required placeholder="What needs doing?" class="flex-1 rounded-lg bg-slate-900 border border-slate-700 px-3 py-2">
+    <select id="p" class="rounded-lg bg-slate-900 border border-slate-700 px-2"><option>low</option><option selected>medium</option><option>high</option></select>
+    <button class="rounded-lg bg-indigo-500 px-4 font-medium">Add task</button>
+  </form>
+  <div class="grid md:grid-cols-3 gap-4" id="board"></div>
+</main>
+<script>
+const cols={todo:"To do",in_progress:"In progress",done:"Done"}, next={todo:"in_progress",in_progress:"done",done:"todo"};
+const pc={low:"bg-slate-700",medium:"bg-amber-600",high:"bg-rose-600"};
+async function load(){const ts=await (await fetch('/tasks')).json();const h=await (await fetch('/health')).json();
+document.getElementById('health').textContent=`API ${h.status} · ${h.tasks} tasks`;
+board.innerHTML=Object.entries(cols).map(([k,l])=>`<section class="rounded-xl bg-slate-900 border border-slate-800 p-3"><h2 class="text-sm text-slate-400 mb-3">${l} (${ts.filter(t=>t.status==k).length})</h2>${ts.filter(t=>t.status==k).map(t=>`<article class="rounded-lg bg-slate-800 p-3 mb-2"><div class="flex items-center gap-2"><span class="text-xs px-2 rounded ${pc[t.priority]}">${t.priority}</span><span class="font-medium">${t.title}</span></div><div class="flex gap-2 mt-2 text-xs"><button onclick="mv(${t.id},'${next[k]}')" class="text-indigo-300">Move → ${cols[next[k]]}</button><button onclick="del(${t.id})" class="text-rose-300 ml-auto">Delete</button></div></article>`).join('')}</section>`).join('')}
+async function mv(id,s){await fetch('/tasks/'+id,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:s})});load()}
+async function del(id){await fetch('/tasks/'+id,{method:'DELETE'});load()}
+f.onsubmit=async e=>{e.preventDefault();await fetch('/tasks',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:t.value,priority:p.value})});t.value='';load()};
+load();
+</script></body></html>
