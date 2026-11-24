@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-100">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold mb-4">Simple Calculator</h1>
+        <input type="number" id="num1" placeholder="Enter first number" class="border p-2 rounded mb-2 w-full" aria-label="First number">
+        <input type="number" id="num2" placeholder="Enter second number" class="border p-2 rounded mb-4 w-full" aria-label="Second number">
+        <div class="flex space-x-2">
+            <button onclick="calculate('add')" class="bg-blue-500 text-white p-2 rounded">Add</button>
+            <button onclick="calculate('subtract')" class="bg-blue-500 text-white p-2 rounded">Subtract</button>
+            <button onclick="calculate('multiply')" class="bg-blue-500 text-white p-2 rounded">Multiply</button>
+            <button onclick="calculate('divide')" class="bg-blue-500 text-white p-2 rounded">Divide</button>
+        </div>
+        <h2 class="mt-4 text-lg">Result: <span id="result" class="font-bold">0</span></h2>
+    </div>
+    <script>
+        async function calculate(operation) {
+            const num1 = parseFloat(document.getElementById('num1').value);
+            const num2 = parseFloat(document.getElementById('num2').value);
+            let response;
+            try {
+                response = await fetch(`/${operation}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ num1, num2 })
+                });
+                if (!response.ok) throw new Error('Invalid input');
+                const result = await response.json();
+                document.getElementById('result').innerText = result.result;
+            } catch (error) {
+                document.getElementById('result').innerText = error.message;
+            }
+        }
+    </script>
+</body>
+</html>
