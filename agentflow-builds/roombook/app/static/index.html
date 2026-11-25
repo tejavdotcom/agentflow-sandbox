@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomBook</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800">RoomBook</h1>
+        <input id="search-input" type="text" placeholder="Search rooms..." class="mt-4 p-2 border border-gray-300 rounded w-full">
+        <button id="search-button" class="mt-2 bg-blue-500 text-white p-2 rounded">Search</button>
+        <div id="room-list" class="mt-4 space-y-4"></div>
+    </div>
+    <script>
+        document.getElementById('search-button').addEventListener('click', async () => {
+            const input = document.getElementById('search-input').value;
+            const response = await fetch(`/rooms?${new URLSearchParams({ date: '2023-10-10', start_time: '10:00', end_time: '12:00', min_capacity: 1 })}`);
+            const rooms = await response.json();
+            const roomList = document.getElementById('room-list');
+            roomList.innerHTML = '';
+            rooms.forEach(room => {
+                const roomCard = document.createElement('div');
+                roomCard.className = 'bg-white p-4 rounded shadow';
+                roomCard.innerHTML = `<h2 class='font-semibold'>${room.name}</h2><p>Floor: ${room.floor}</p><p>Capacity: ${room.capacity}</p><button class='book-button bg-green-500 text-white p-2 rounded' data-room-id='${room.id}'>Book</button>`;
+                roomList.appendChild(roomCard);
+            });
+        });
+    </script>
+</body>
+</html>
